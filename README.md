@@ -1,36 +1,55 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# **Real-Time Orderbook Viewer & Simulation Tool**
 
-## Getting Started
+This is a high-performance frontend application built with Next.js that provides a real-time orderbook viewer for multiple cryptocurrency exchanges. It includes powerful order simulation capabilities to help traders visualize market impact and optimal timing before executing a trade.
 
-First, run the development server:
+**Live Demo:** \[Link to your deployed application on Vercel/Netlify\] *(Note: Replace this with your actual link if you deploy it)*
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
-```
+## **Features**
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+* **Multi-Venue Connectivity**: Establishes real-time WebSocket connections to **OKX**, **Bybit**, and **Deribit**.  
+* **Live Orderbook Display**: Renders 15+ levels of best bids and asks, updating instantly as new data arrives.  
+* **Dynamic Symbol Switching**: Users can input any trading pair (e.g., ETH-USD, SOL-USD) to fetch its specific orderbook.  
+* **Advanced Order Simulation**: A comprehensive form to simulate Market and Limit orders.  
+* **Instant Visual Feedback**: Simulated limit orders are immediately highlighted in the orderbook to show their position.  
+* **Market Impact Analysis**: Automatically calculates and displays key metrics for simulated market orders, including:  
+  * Estimated Fill Price  
+  * Slippage Percentage  
+  * Fill Percentage  
+  * Total Trade Value (Market Impact)  
+* **Dual-Theme UI**: A sleek and responsive interface with both **Light** and **Dark** modes.  
+* **(Bonus) Market Depth Chart**: A visual representation of cumulative buy and sell pressure, which updates in real-time alongside the orderbook.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## **Tech Stack & Architectural Decisions**
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+* **Framework**: Next.js (React)  
+* **Language**: TypeScript  
+* **Styling**: Tailwind CSS (with class-based dark mode)  
+* **State Management**: Zustand  
+  * *Decision*: I chose Zustand for its simplicity, minimal boilerplate, and excellent performance in handling frequent state updates from multiple WebSocket streams. It avoids the complexity of Redux while providing a centralized, hook-based store.  
+* **Data Fetching**: Native WebSocket API  
+* **Charting**: Recharts  
+* **Icons**: Lucide React
 
-## Learn More
+The application is architected around a central useOrderbook custom hook which manages the WebSocket lifecycle, including connection, subscription, and heartbeat messages for each exchange. This isolates the complex data-fetching logic from the UI components.
 
-To learn more about Next.js, take a look at the following resources:
+## **How to Run Locally**
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+1. **Clone the repository:**  
+   git clone \<your-github-repository-url\>
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+2. **Navigate to the project directory:**  
+   cd orderbook-viewer
 
-## Deploy on Vercel
+3. **Install dependencies:**  
+   npm install
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+4. **Run the development server:**  
+   npm run dev
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+5. Open [http://localhost:3000](https://www.google.com/search?q=http://localhost:3000) in your browser.
+
+## **API Resources**
+
+* **OKX API:** [https://www.okx.com/docs-v5/](https://www.okx.com/docs-v5/)  
+* **Bybit API:** [https://bybit-exchange.github.io/docs/v5/intro](https://bybit-exchange.github.io/docs/v5/intro)  
+* **Deribit API:** [https://docs.deribit.com/](https://docs.deribit.com/)
