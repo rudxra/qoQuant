@@ -1,20 +1,38 @@
+// src/components/orderbook/DepthChart.tsx
 "use client";
 
 import React, { useMemo } from 'react';
-import { ResponsiveContainer, AreaChart, XAxis, YAxis, Tooltip, Area, TooltipProps } from 'recharts';
-import { ValueType, NameType } from 'recharts/types/component/DefaultTooltipContent';
+import { ResponsiveContainer, AreaChart, XAxis, YAxis, Tooltip, Area } from 'recharts';
 import { OrderbookLevel } from '@/store/orderbookStore';
 import { useTheme } from '@/app/providers/theme-provider';
 
-const CustomTooltip = ({ active, payload, label }: TooltipProps<ValueType, NameType>) => {
+// Define a custom interface for the tooltip's payload to ensure type safety
+interface TooltipPayload {
+  dataKey: string;
+  value: number;
+  payload: {
+    price: number;
+    bids: number;
+    asks: number;
+  };
+}
+
+// Define the props for our custom tooltip component
+interface CustomTooltipProps {
+  active?: boolean;
+  payload?: TooltipPayload[];
+  label?: string | number;
+}
+
+const CustomTooltip = ({ active, payload, label }: CustomTooltipProps) => {
   if (active && payload && payload.length) {
     const bids = payload.find((p) => p.dataKey === 'bids')?.value;
     const asks = payload.find((p) => p.dataKey === 'asks')?.value;
     return (
       <div className="bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm p-2 rounded-md border border-gray-300 dark:border-gray-700 text-sm shadow-md">
         <p className="font-bold text-gray-900 dark:text-gray-100">{`Price: ${typeof label === 'number' ? label.toFixed(2) : label}`}</p>
-        {bids && <p className="text-green-600 dark:text-green-400">{`Cumulative Bids: ${(bids as number).toFixed(4)}`}</p>}
-        {asks && <p className="text-red-600 dark:text-red-400">{`Cumulative Asks: ${(asks as number).toFixed(4)}`}</p>}
+        {bids && bids > 0 && <p className="text-green-600 dark:text-green-400">{`Cumulative Bids: ${bids.toFixed(4)}`}</p>}
+        {asks && asks > 0 && <p className="text-red-600 dark:text-red-400">{`Cumulative Asks: ${asks.toFixed(4)}`}</p>}
       </div>
     );
   }

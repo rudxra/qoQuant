@@ -29,6 +29,7 @@ const venueConfig = {
     getPingMsg: () => 'ping',
     parseMessage: (msg: WebSocketMessage): { type: 'snapshot' | 'update', bids: OrderbookLevel[], asks: OrderbookLevel[] } | null => {
       const action = msg.action as 'snapshot' | 'update';
+      // OKX provides all 4 elements, so this should be correct.
       const data = msg.data as { bids: OrderbookLevel[], asks: OrderbookLevel[] }[];
       if (data && action) {
         return { type: action, bids: data[0].bids, asks: data[0].asks };
@@ -45,8 +46,9 @@ const venueConfig = {
       const type = msg.type as 'snapshot' | 'delta';
       const data = msg.data as { b: [string, string][], a: [string, string][] };
       if (data && type) {
-        const bids = data.b.map((l: [string, string]) => [l[0], l[1], '0', '0']);
-        const asks = data.a.map((l: [string, string]) => [l[0], l[1], '0', '0']);
+        // FIX: Ensure the mapped array has 4 elements to match OrderbookLevel
+        const bids: OrderbookLevel[] = data.b.map((l: [string, string]): OrderbookLevel => [l[0], l[1], '0', '0']);
+        const asks: OrderbookLevel[] = data.a.map((l: [string, string]): OrderbookLevel => [l[0], l[1], '0', '0']);
         return { type: type === 'delta' ? 'update' : 'snapshot', bids, asks };
       }
       return null;
@@ -61,8 +63,9 @@ const venueConfig = {
         const params = msg.params as { data: { bids: [string, number, number][], asks: [string, number, number][], type: 'snapshot' | 'update' } };
         if (params && params.data) {
             const { bids, asks, type } = params.data;
-            const formattedBids = bids.map((b: [string, number, number]) => [b[1].toString(), b[2].toString(), '0', '0']);
-            const formattedAsks = asks.map((a: [string, number, number]) => [a[1].toString(), a[2].toString(), '0', '0']);
+            // FIX: Ensure the mapped array has 4 elements to match OrderbookLevel
+            const formattedBids: OrderbookLevel[] = bids.map((b: [string, number, number]): OrderbookLevel => [b[1].toString(), b[2].toString(), '0', '0']);
+            const formattedAsks: OrderbookLevel[] = asks.map((a: [string, number, number]): OrderbookLevel => [a[1].toString(), a[2].toString(), '0', '0']);
             return { type, bids: formattedBids, asks: formattedAsks };
         }
         return null;
