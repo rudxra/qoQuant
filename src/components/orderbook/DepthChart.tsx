@@ -6,7 +6,6 @@ import { ResponsiveContainer, AreaChart, XAxis, YAxis, Tooltip, Area } from 'rec
 import { OrderbookLevel } from '@/store/orderbookStore';
 import { useTheme } from '@/app/providers/theme-provider';
 
-// Define a custom interface for the tooltip's payload to ensure type safety
 interface TooltipPayload {
   dataKey: string;
   value: number;
@@ -17,7 +16,6 @@ interface TooltipPayload {
   };
 }
 
-// Define the props for our custom tooltip component
 interface CustomTooltipProps {
   active?: boolean;
   payload?: TooltipPayload[];

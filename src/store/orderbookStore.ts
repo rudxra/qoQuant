@@ -23,15 +23,13 @@ const applyUpdates = (currentBook: OrderbookLevel[], updates: OrderbookLevel[]):
     const quantity = parseFloat(update[1]);
 
     if (quantity === 0) {
-      bookMap.delete(price); // Remove the level if quantity is zero
+      bookMap.delete(price); 
     } else {
-      bookMap.set(price, update); // Add or update the level
+      bookMap.set(price, update); 
     }
   });
 
-  // Convert map back to array and sort it
   const newBook = Array.from(bookMap.values());
-  // Bids should be sorted descending, asks ascending
   newBook.sort((a, b) => parseFloat(b[0]) - parseFloat(a[0]));
   
   return newBook;
@@ -68,10 +66,8 @@ export const useOrderbookStore = create<OrderbookState>((set) => ({
   setSelectedVenue: (venue) => set({ selectedVenue: venue, simulatedOrder: null }),
   setSelectedSymbol: (symbol) => set({ selectedSymbol: symbol, simulatedOrder: null, bids: [], asks: [] }),
   
-  // Action to handle the initial full snapshot of the order book
   processSnapshot: (data) => set({ bids: data.bids, asks: data.asks }),
 
-  // Action to apply delta updates to the existing order book
   processUpdate: (data) => set((state) => ({
     bids: applyUpdates(state.bids, data.bids),
     asks: applyUpdates(state.asks, data.asks).sort((a, b) => parseFloat(a[0]) - parseFloat(b[0])), // Asks need ascending sort

@@ -2,12 +2,12 @@
 
 This is a high-performance frontend application built with Next.js that provides a real-time orderbook viewer for multiple cryptocurrency exchanges. It includes powerful order simulation capabilities to help traders visualize market impact and optimal timing before executing a trade.
 
-**Live Demo:** \[Link to your deployed application on Vercel/Netlify\] *(Note: Replace this with your actual link if you deploy it)*
+**Live Demo:** [https://qo-quant-ovxi.vercel.app/](https://qo-quant-ovxi.vercel.app/)
 
 ## **Features**
 
 * **Multi-Venue Connectivity**: Establishes real-time WebSocket connections to **OKX**, **Bybit**, and **Deribit**.  
-* **Live Orderbook Display**: Renders 15+ levels of best bids and asks, updating instantly as new data arrives.  
+* **Live Orderbook Display**: Renders multiple levels of best bids and asks, updating instantly as new data arrives.  
 * **Dynamic Symbol Switching**: Users can input any trading pair (e.g., ETH-USD, SOL-USD) to fetch its specific orderbook.  
 * **Advanced Order Simulation**: A comprehensive form to simulate Market and Limit orders.  
 * **Instant Visual Feedback**: Simulated limit orders are immediately highlighted in the orderbook to show their position.  
@@ -35,10 +35,10 @@ The application is architected around a central useOrderbook custom hook which m
 ## **How to Run Locally**
 
 1. **Clone the repository:**  
-   git clone \<your-github-repository-url\>
+   git clone https://github.com/rudxra/qoQuant
 
 2. **Navigate to the project directory:**  
-   cd orderbook-viewer
+   cd qoQuant
 
 3. **Install dependencies:**  
    npm install
