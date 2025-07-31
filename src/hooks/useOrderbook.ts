@@ -4,6 +4,9 @@ import { useOrderbookStore, OrderbookLevel } from '@/store/orderbookStore';
 
 type Venue = 'OKX' | 'Bybit' | 'Deribit';
 
+// Define a general type for incoming WebSocket messages to avoid 'any'
+type WebSocketMessage = Record<string, any>;
+
 const formatSymbolForVenue = (userInput: string, venue: Venue): string => {
     const parts = userInput.toUpperCase().split(/[-/]/);
     const base = parts[0];
@@ -24,7 +27,7 @@ const venueConfig = {
     getSubscriptionMsg: (symbol: string) => ({ op: 'subscribe', args: [{ channel: 'books', instId: symbol }] }), // Using full 'books' channel for better snapshots
     getUnsubscriptionMsg: (symbol: string) => ({ op: 'unsubscribe', args: [{ channel: 'books', instId: symbol }] }),
     getPingMsg: () => 'ping',
-    parseMessage: (msg: any): { type: 'snapshot' | 'update', bids: OrderbookLevel[], asks: OrderbookLevel[] } | null => {
+    parseMessage: (msg: WebSocketMessage): { type: 'snapshot' | 'update', bids: OrderbookLevel[], asks: OrderbookLevel[] } | null => {
       if (msg.data && msg.action) {
         return { type: msg.action, bids: msg.data[0].bids, asks: msg.data[0].asks };
       }
@@ -36,7 +39,7 @@ const venueConfig = {
     getSubscriptionMsg: (symbol: string) => ({ op: 'subscribe', args: [`orderbook.50.${symbol}`] }), // Using deeper orderbook
     getUnsubscriptionMsg: (symbol:string) => ({ op: 'unsubscribe', args: [`orderbook.50.${symbol}`] }),
     getPingMsg: () => ({ op: 'ping' }),
-    parseMessage: (msg: any): { type: 'snapshot' | 'update', bids: OrderbookLevel[], asks: OrderbookLevel[] } | null => {
+    parseMessage: (msg: WebSocketMessage): { type: 'snapshot' | 'update', bids: OrderbookLevel[], asks: OrderbookLevel[] } | null => {
       if (msg.data && msg.type) {
         const bids = msg.data.b.map((l: [string, string]) => [l[0], l[1], '0', '0']);
         const asks = msg.data.a.map((l: [string, string]) => [l[0], l[1], '0', '0']);
@@ -50,7 +53,7 @@ const venueConfig = {
     getSubscriptionMsg: (symbol: string) => ({ jsonrpc: '2.0', method: 'public/subscribe', params: { channels: [`book.${symbol}.100ms`] } }),
     getUnsubscriptionMsg: (symbol: string) => ({ jsonrpc: '2.0', method: 'public/unsubscribe', params: { channels: [`book.${symbol}.100ms`] } }),
     getPingMsg: () => ({ jsonrpc: '2.0', method: 'public/test', params: {} }),
-    parseMessage: (msg: any): { type: 'snapshot' | 'update', bids: OrderbookLevel[], asks: OrderbookLevel[] } | null => {
+    parseMessage: (msg: WebSocketMessage): { type: 'snapshot' | 'update', bids: OrderbookLevel[], asks: OrderbookLevel[] } | null => {
         if (msg.params && msg.params.data) {
             const { bids, asks, type } = msg.params.data;
             const formattedBids = bids.map((b: [string, number, number]) => [b[1].toString(), b[2].toString(), '0', '0']);

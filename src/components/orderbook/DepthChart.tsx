@@ -1,25 +1,20 @@
-// src/components/orderbook/DepthChart.tsx
 "use client";
 
 import React, { useMemo } from 'react';
-import { ResponsiveContainer, AreaChart, XAxis, YAxis, Tooltip, Area } from 'recharts';
+import { ResponsiveContainer, AreaChart, XAxis, YAxis, Tooltip, Area, TooltipProps } from 'recharts';
+import { ValueType, NameType } from 'recharts/types/component/DefaultTooltipContent';
 import { OrderbookLevel } from '@/store/orderbookStore';
+import { useTheme } from '@/app/providers/theme-provider';
 
-interface ChartDataPoint {
-  price: number;
-  bids: number;
-  asks: number;
-}
-
-const CustomTooltip = ({ active, payload, label }: any) => {
+const CustomTooltip = ({ active, payload, label }: TooltipProps<ValueType, NameType>) => {
   if (active && payload && payload.length) {
-    const bids = payload.find((p: any) => p.dataKey === 'bids')?.value;
-    const asks = payload.find((p: any) => p.dataKey === 'asks')?.value;
+    const bids = payload.find((p) => p.dataKey === 'bids')?.value;
+    const asks = payload.find((p) => p.dataKey === 'asks')?.value;
     return (
-      <div className="bg-gray-800/80 p-2 rounded-md border border-gray-700 text-sm">
-        <p className="font-bold">{`Price: ${label.toFixed(2)}`}</p>
-        {bids > 0 && <p className="text-green-400">{`Cumulative Bids: ${bids.toFixed(4)}`}</p>}
-        {asks > 0 && <p className="text-red-400">{`Cumulative Asks: ${asks.toFixed(4)}`}</p>}
+      <div className="bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm p-2 rounded-md border border-gray-300 dark:border-gray-700 text-sm shadow-md">
+        <p className="font-bold text-gray-900 dark:text-gray-100">{`Price: ${typeof label === 'number' ? label.toFixed(2) : label}`}</p>
+        {bids && <p className="text-green-600 dark:text-green-400">{`Cumulative Bids: ${(bids as number).toFixed(4)}`}</p>}
+        {asks && <p className="text-red-600 dark:text-red-400">{`Cumulative Asks: ${(asks as number).toFixed(4)}`}</p>}
       </div>
     );
   }
@@ -28,6 +23,8 @@ const CustomTooltip = ({ active, payload, label }: any) => {
 
 
 export const DepthChart = ({ bids, asks }: { bids: OrderbookLevel[], asks: OrderbookLevel[] }) => {
+  const { theme } = useTheme();
+
   const chartData = useMemo(() => {
     let cumulativeBids = 0;
     const bidData = bids
@@ -48,11 +45,13 @@ export const DepthChart = ({ bids, asks }: { bids: OrderbookLevel[], asks: Order
 
   if (!bids.length && !asks.length) {
     return (
-        <div className="h-64 flex items-center justify-center text-gray-500">
+        <div className="h-64 flex items-center justify-center text-gray-400 dark:text-gray-500">
             Awaiting data for depth chart...
         </div>
     )
   }
+
+  const tickColor = theme === 'dark' ? '#6B7280' : '#4B5563';
 
   return (
     <div className="h-64 w-full mt-4">
@@ -63,29 +62,31 @@ export const DepthChart = ({ bids, asks }: { bids: OrderbookLevel[], asks: Order
         >
           <defs>
             <linearGradient id="colorBids" x1="0" y1="0" x2="0" y2="1">
-              <stop offset="5%" stopColor="#10B981" stopOpacity={0.8}/>
+              <stop offset="5%" stopColor="#10B981" stopOpacity={0.4}/>
               <stop offset="95%" stopColor="#10B981" stopOpacity={0}/>
             </linearGradient>
             <linearGradient id="colorAsks" x1="0" y1="0" x2="0" y2="1">
-              <stop offset="5%" stopColor="#F87171" stopOpacity={0.8}/>
-              <stop offset="95%" stopColor="#F87171" stopOpacity={0}/>
+              <stop offset="5%" stopColor="#EF4444" stopOpacity={0.4}/>
+              <stop offset="95%" stopColor="#EF4444" stopOpacity={0}/>
             </linearGradient>
           </defs>
           <XAxis 
             dataKey="price" 
             type="number" 
             domain={['dataMin', 'dataMax']} 
-            tickFormatter={(price) => price.toFixed(2)}
-            stroke="#9CA3AF"
+            tickFormatter={(price) => price.toFixed(0)}
+            stroke={tickColor}
+            fontSize={12}
           />
           <YAxis 
             orientation="right" 
-            stroke="#9CA3AF"
-            tickFormatter={(value) => (value > 1000 ? `${(value/1000).toFixed(1)}k` : value)}
+            stroke={tickColor}
+            fontSize={12}
+            tickFormatter={(value) => (value > 1000 ? `${(value/1000).toFixed(0)}k` : value)}
           />
           <Tooltip content={<CustomTooltip />} />
-          <Area type="step" dataKey="bids" stroke="#10B981" fillOpacity={1} fill="url(#colorBids)" />
-          <Area type="step" dataKey="asks" stroke="#F87171" fillOpacity={1} fill="url(#colorAsks)" />
+          <Area type="step" dataKey="bids" strokeWidth={2} stroke="#16A34A" fill="url(#colorBids)" />
+          <Area type="step" dataKey="asks" strokeWidth={2} stroke="#DC2626" fill="url(#colorAsks)" />
         </AreaChart>
       </ResponsiveContainer>
     </div>
