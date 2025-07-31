@@ -5,7 +5,7 @@ import { useOrderbookStore, OrderbookLevel } from '@/store/orderbookStore';
 type Venue = 'OKX' | 'Bybit' | 'Deribit';
 
 // Define a general type for incoming WebSocket messages to avoid 'any'
-type WebSocketMessage = Record<string, any>;
+type WebSocketMessage = Record<string, unknown>;
 
 const formatSymbolForVenue = (userInput: string, venue: Venue): string => {
     const parts = userInput.toUpperCase().split(/[-/]/);
@@ -24,26 +24,30 @@ const formatSymbolForVenue = (userInput: string, venue: Venue): string => {
 const venueConfig = {
   OKX: {
     wsUrl: 'wss://ws.okx.com:8443/ws/v5/public',
-    getSubscriptionMsg: (symbol: string) => ({ op: 'subscribe', args: [{ channel: 'books', instId: symbol }] }), // Using full 'books' channel for better snapshots
+    getSubscriptionMsg: (symbol: string) => ({ op: 'subscribe', args: [{ channel: 'books', instId: symbol }] }),
     getUnsubscriptionMsg: (symbol: string) => ({ op: 'unsubscribe', args: [{ channel: 'books', instId: symbol }] }),
     getPingMsg: () => 'ping',
     parseMessage: (msg: WebSocketMessage): { type: 'snapshot' | 'update', bids: OrderbookLevel[], asks: OrderbookLevel[] } | null => {
-      if (msg.data && msg.action) {
-        return { type: msg.action, bids: msg.data[0].bids, asks: msg.data[0].asks };
+      const action = msg.action as 'snapshot' | 'update';
+      const data = msg.data as { bids: OrderbookLevel[], asks: OrderbookLevel[] }[];
+      if (data && action) {
+        return { type: action, bids: data[0].bids, asks: data[0].asks };
       }
       return null;
     },
   },
   Bybit: {
     wsUrl: 'wss://stream.bybit.com/v5/public/linear',
-    getSubscriptionMsg: (symbol: string) => ({ op: 'subscribe', args: [`orderbook.50.${symbol}`] }), // Using deeper orderbook
+    getSubscriptionMsg: (symbol: string) => ({ op: 'subscribe', args: [`orderbook.50.${symbol}`] }),
     getUnsubscriptionMsg: (symbol:string) => ({ op: 'unsubscribe', args: [`orderbook.50.${symbol}`] }),
     getPingMsg: () => ({ op: 'ping' }),
     parseMessage: (msg: WebSocketMessage): { type: 'snapshot' | 'update', bids: OrderbookLevel[], asks: OrderbookLevel[] } | null => {
-      if (msg.data && msg.type) {
-        const bids = msg.data.b.map((l: [string, string]) => [l[0], l[1], '0', '0']);
-        const asks = msg.data.a.map((l: [string, string]) => [l[0], l[1], '0', '0']);
-        return { type: msg.type === 'delta' ? 'update' : 'snapshot', bids, asks };
+      const type = msg.type as 'snapshot' | 'delta';
+      const data = msg.data as { b: [string, string][], a: [string, string][] };
+      if (data && type) {
+        const bids = data.b.map((l: [string, string]) => [l[0], l[1], '0', '0']);
+        const asks = data.a.map((l: [string, string]) => [l[0], l[1], '0', '0']);
+        return { type: type === 'delta' ? 'update' : 'snapshot', bids, asks };
       }
       return null;
     },
@@ -54,8 +58,9 @@ const venueConfig = {
     getUnsubscriptionMsg: (symbol: string) => ({ jsonrpc: '2.0', method: 'public/unsubscribe', params: { channels: [`book.${symbol}.100ms`] } }),
     getPingMsg: () => ({ jsonrpc: '2.0', method: 'public/test', params: {} }),
     parseMessage: (msg: WebSocketMessage): { type: 'snapshot' | 'update', bids: OrderbookLevel[], asks: OrderbookLevel[] } | null => {
-        if (msg.params && msg.params.data) {
-            const { bids, asks, type } = msg.params.data;
+        const params = msg.params as { data: { bids: [string, number, number][], asks: [string, number, number][], type: 'snapshot' | 'update' } };
+        if (params && params.data) {
+            const { bids, asks, type } = params.data;
             const formattedBids = bids.map((b: [string, number, number]) => [b[1].toString(), b[2].toString(), '0', '0']);
             const formattedAsks = asks.map((a: [string, number, number]) => [a[1].toString(), a[2].toString(), '0', '0']);
             return { type, bids: formattedBids, asks: formattedAsks };
@@ -95,7 +100,7 @@ export const useOrderbook = () => {
 
     ws.current.onmessage = (event) => {
       if (event.data === 'pong') return;
-      const message = JSON.parse(event.data);
+      const message: WebSocketMessage = JSON.parse(event.data);
 
       if (message.event === 'error' || message.success === false) {
           console.error(`[${selectedVenue}] API Error:`, message.msg || message.ret_msg);

@@ -56,7 +56,7 @@ interface OrderbookState {
   setSimulatedOrder: (order: SimulatedOrder | null) => void;
 }
 
-export const useOrderbookStore = create<OrderbookState>((set, get) => ({
+export const useOrderbookStore = create<OrderbookState>((set) => ({
   bids: [],
   asks: [],
   isConnected: false,
